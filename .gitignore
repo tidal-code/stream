@@ -1,0 +1,20 @@
+# Created by .ignore support plugin (hsz.mobi)**/target/
+**/.allure/
+**/allure-results
+**/target
+**/*.iml
+.classpath
+.project
+debug.log
+.settings/
+data/eam.db-journal
+src/test/resources/data/eam.db-journal
+*.iml
+*.ipr
+*.iws
+/.idea/*
+/build/
+/out/
+/.gradle/
+**/artefacts
+**/app.log
