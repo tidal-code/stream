@@ -71,6 +71,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.github.tidal-code</groupId>
+            <artifactId>utils</artifactId>
+            <version>0.0.5</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
