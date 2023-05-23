@@ -1,9 +1,10 @@
 package com.tidal.stream.http;
 
 import com.tidal.stream.filehandler.FileReader;
-import com.tidal.stream.json.JsonReader;
-import com.tidal.stream.rest.ReqType;
+import com.tidal.stream.httpRequest.ReqType;
+import com.tidal.stream.httpRequest.Request;
 import com.tidal.flow.assertions.Assert;
+import com.tidal.stream.json.JsonReader;
 import org.junit.After;
 import org.junit.Test;
 
@@ -53,7 +54,7 @@ public class RequestTest {
         Request.set("https://reqres.in/api/users");
         Request.setPayload(FileReader.readFileToString("reqrespost.json"));
         Request.send(ReqType.PATCH);
-        Request.logResponse();
+//        Request.logResponse();
         verify("", JsonReader.readValue("name", Request.getResponseString()).toString()).isEqualTo("morpheus");
     }
 

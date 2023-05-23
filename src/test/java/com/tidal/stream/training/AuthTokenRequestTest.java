@@ -1,8 +1,8 @@
 package com.tidal.stream.training;
 
 import com.tidal.stream.filehandler.FileReader;
-import com.tidal.stream.http.Request;
-import com.tidal.stream.rest.ReqType;
+import com.tidal.stream.httpRequest.ReqType;
+import com.tidal.stream.httpRequest.Request;
 import org.junit.Test;
 
 public class AuthTokenRequestTest {
