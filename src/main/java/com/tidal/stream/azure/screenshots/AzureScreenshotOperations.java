@@ -3,6 +3,7 @@ package com.tidal.stream.azure.screenshots;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.common.net.UrlEscapers;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.tidal.stream.httpRequest.ReqType;
 import com.tidal.stream.httpRequest.Request;
@@ -32,11 +33,14 @@ public class AzureScreenshotOperations implements AzureSSOperations {
     private final String authorizationCredential;
     private final String buildUri;
 
+    private final String azureUri;
+
     private static final Path TARGET_FOLDER_PATH = Paths.get(Helper.getAbsoluteFromRelativePath(FilePaths.TARGET_FOLDER_PATH.getPath()));
 
-    public AzureScreenshotOperations(String currentBuildUri, String azureToken) {
-        buildUri = currentBuildUri;
-        authorizationCredential = Credentials.basic("", azureToken);
+    public AzureScreenshotOperations(AzurePipelineInfo azurePipelineInfo) {
+        buildUri = azurePipelineInfo.getAzureBuildUri();
+        authorizationCredential = Credentials.basic("", azurePipelineInfo.getAzureToken());
+        azureUri=String.format(AzureEndPoints.AZURE_BASE_URI,azurePipelineInfo.getAzureDevopsOrgName(), UrlEscapers.urlFragmentEscaper().escape(azurePipelineInfo.getAzureDevopsProjectName()));
     }
 
     /**
@@ -50,7 +54,7 @@ public class AzureScreenshotOperations implements AzureSSOperations {
         int result;
         try {
             logger.info("Finding the test run for build URI: " + buildUri);
-            String endPoint = AzureEndPoints.AZURE_BASE_URI + String.format(AzureEndPoints.TEST_RUN_ID_ENDPOINT, buildUri);
+            String endPoint = azureUri + String.format(AzureEndPoints.TEST_RUN_ID_ENDPOINT, buildUri);
             Request.set(endPoint);
             Request.setHeader(AUTHENTICATION_HEADER_NAME, authorizationCredential);
             Request.send(ReqType.GET);
@@ -71,7 +75,7 @@ public class AzureScreenshotOperations implements AzureSSOperations {
     public List<AzureTestCaseModel> getFailedTestCasesFromAzureTestRun(Integer runId) {
         List<AzureTestCaseModel> failedTestId = new ArrayList<>();
         try {
-            String endPoint = AzureEndPoints.AZURE_BASE_URI + String.format(AzureEndPoints.FAILED_RUN_RESULT_ID_ENDPOINT, runId);
+            String endPoint = azureUri + String.format(AzureEndPoints.FAILED_RUN_RESULT_ID_ENDPOINT, runId);
             Request.set(endPoint);
             Request.setHeader(AUTHENTICATION_HEADER_NAME, authorizationCredential);
             Request.send(ReqType.GET);
@@ -115,7 +119,7 @@ public class AzureScreenshotOperations implements AzureSSOperations {
         azureTestCaseModels.parallelStream().forEach(azureTestCaseModel -> {
             String formattedScenarioName = azureTestCaseModel.getTestCaseName().replaceAll("[^a-zA-Z0-9]", "");
             if (Finder.findFileIfExists(formattedScenarioName + ".txt", TARGET_FOLDER_PATH).isPresent()) {
-                String endPoint = AzureEndPoints.AZURE_BASE_URI + String.format(AzureEndPoints.POST_SCREENSHOT_END_POINT, runId, azureTestCaseModel.getTestCaseId());
+                String endPoint = azureUri + String.format(AzureEndPoints.POST_SCREENSHOT_END_POINT, runId, azureTestCaseModel.getTestCaseId());
                 Request.set(endPoint);
                 Request.setHeader(AUTHENTICATION_HEADER_NAME, authorizationCredential);
                 String payload = generateAzureScreenshotPayload(azureTestCaseModel);

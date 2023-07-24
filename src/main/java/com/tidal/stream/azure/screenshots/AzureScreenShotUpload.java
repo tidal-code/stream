@@ -1,6 +1,6 @@
 package com.tidal.stream.azure.screenshots;
 
-import com.tidal.utils.utils.CheckString;
+import com.google.common.net.UrlEscapers;
 import org.apache.log4j.Logger;
 
 
@@ -15,15 +15,17 @@ public class AzureScreenShotUpload {
      * @param args 0 or more default args to be passed.
      */
     public static void main(String... args) {
-        //Read Current BuildUri and AzureToken
-        String currentBuildUri = System.getProperty("adoBuildUri");
-        String azureToken = System.getProperty("adoToken");
-
-        if (CheckString.isNotNullOrEmpty(currentBuildUri) && CheckString.isNotNullOrEmpty(azureToken)) {
-            AzureSSOperations azureSSOperations = new AzureScreenshotOperations(currentBuildUri, azureToken);
+        //Read Current Build Info and AzureToken
+        AzurePipelineInfo azurePipelineInfo=new AzurePipelineInfo();
+        azurePipelineInfo.setAzureToken(System.getProperty("adoToken"));
+        azurePipelineInfo.setAzureDevopsOrgName(System.getProperty("adoOrgName"));
+        azurePipelineInfo.setAzureDevopsProjectName(UrlEscapers.urlFragmentEscaper().escape(System.getProperty("adoProjectName")));
+        azurePipelineInfo.setAzureBuildUri(System.getProperty("adoBuildUri"));
+        if (azurePipelineInfo.isValidBuildInfoSupplied() ) {
+            AzureSSOperations azureSSOperations = new AzureScreenshotOperations(azurePipelineInfo);
             azureSSOperations.uploadScreenShot();
         } else {
-            logger.info("Exiting the job as the build id and the token is not supplied..");
+            logger.info("Exiting the job as the build id (adoBuildUri), project name (adoProjectName), org name (adoOrgName)  and the token(adoToken) is not supplied..");
         }
     }
 }
