@@ -1,6 +1,6 @@
 package com.tidal.stream.azure.screenshots;
 
-import com.google.common.net.UrlEscapers;
+
 import org.apache.log4j.Logger;
 
 
@@ -19,7 +19,7 @@ public class AzureScreenShotUpload {
         AzurePipelineInfo azurePipelineInfo=new AzurePipelineInfo();
         azurePipelineInfo.setAzureToken(System.getProperty("adoToken"));
         azurePipelineInfo.setAzureDevopsOrgName(System.getProperty("adoOrgName"));
-        azurePipelineInfo.setAzureDevopsProjectName(UrlEscapers.urlFragmentEscaper().escape(System.getProperty("adoProjectName")));
+        azurePipelineInfo.setAzureDevopsProjectName(System.getProperty("adoProjectName"));
         azurePipelineInfo.setAzureBuildUri(System.getProperty("adoBuildUri"));
         if (azurePipelineInfo.isValidBuildInfoSupplied() ) {
             AzureSSOperations azureSSOperations = new AzureScreenshotOperations(azurePipelineInfo);
