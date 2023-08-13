@@ -13,7 +13,7 @@ public class ZephyrScaleCukes {
 
     Logger logger  = LoggerFactory.getLogger(ZephyrScaleCukes.class);
 
-    public static List<String> tags = new ArrayList<>();
+    public static List<String> tags = new LinkedList<>();
     String testTag;
     String testStatus;
     Function<String, String> readProperty = PropertiesFinder::getProperty;
