@@ -6,7 +6,7 @@
 
     <groupId>io.github.tidal-code</groupId>
     <artifactId>stream</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.4-SNAPSHOT</version>
 
     <name>Tidal API Automation Library</name>
     <description>API Automation Code Repository</description>

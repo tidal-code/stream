@@ -1,13 +1,14 @@
 package com.tidal.stream.azure.screenshots;
 
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class AzureScreenShotUpload {
 
 
-    public static final Logger logger = Logger.getLogger(AzureScreenShotUpload.class);
+    public static final Logger logger = LoggerFactory.getLogger(AzureScreenShotUpload.class);
 
     /**
      * Main method to be called in the exec plugin to upload screenshots.

@@ -1,7 +1,13 @@
 package com.tidal.stream.httpRequest;
 
 public enum ReqType {
-    GET("get"), POST("post"), PUT("put"), PATCH("patch"), DELETE("delete");
+    GET("get"),
+    POST("post"),
+    PUT("put"),
+    PATCH("patch"),
+    HEAD("head"),
+    OPTIONS("options"),
+    DELETE("delete");
 
     private final String value;
 
