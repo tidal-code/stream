@@ -47,7 +47,7 @@ public class Request {
     /**
      * Sets the base Uri as a rest assured property instead of a request specification instance.
      * This would enable the creation of a new instance of request specification without deleting
-     * the base Uri
+     * the base Uri.
      *
      * @param baseUri the base uri or end point
      */
