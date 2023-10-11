@@ -1,13 +1,8 @@
 package com.tidal.stream.httpRequest;
 
-import com.tidal.utils.exceptions.RuntimeTestException;
-import com.tidal.utils.propertieshandler.PropertiesFinder;
-import okhttp3.*;
+import okhttp3.Response;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Optional;
 
 
 public class Request {

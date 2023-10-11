@@ -1,5 +1,6 @@
 package com.tidal.stream.httpRequest;
 
+import com.tidal.utils.exceptions.PropertyHandlerException;
 import com.tidal.utils.exceptions.RuntimeTestException;
 import com.tidal.utils.propertieshandler.PropertiesFinder;
 import okhttp3.*;
@@ -8,12 +9,11 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class FluentRequest {
 
     private final Function<String, String> timeOut = PropertiesFinder::getProperty;
-
-    private final Function<String, String> readTimeOut = s -> timeOut.apply(s) == null ? "10" : timeOut.apply(s);
 
     private final String BASE_URI = "baseURI";
     private final String MEDIA_TYPE = "mediaType";
@@ -28,6 +28,14 @@ public class FluentRequest {
     private HashMap<String, Object> DATA_MAP;
     private Map<String, Object> HEADER_MAP;
     private Headers REQUEST_HEADERS;
+
+    private final UnaryOperator<String> readTimeOut = s -> {
+        try {
+            return timeOut.apply(s) == null ? "10" : timeOut.apply(s);
+        } catch (PropertyHandlerException ignored){
+            return "10";
+        }
+    };
 
     /**
      * Method to set your own custom HttpRequest in case the built-in builder is not sufficient

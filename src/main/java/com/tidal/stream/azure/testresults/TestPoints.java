@@ -5,7 +5,7 @@ import com.tidal.stream.httpRequest.ReqType;
 import com.tidal.stream.httpRequest.Request;
 import com.tidal.utils.json.JsonReader;
 import com.tidal.utils.propertieshandler.PropertiesFinder;
-import net.minidev.json.JSONArray;
+import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class TestPoints {
         List<Integer> testPoints = new ArrayList<>();
 
         for (String test : tests) {
-            for (int i1 = 0; i1 < testCases.size(); i1++) {
+            for (int i1 = 0; i1 < testCases.length(); i1++) {
                 if (test.equals(testCases.get(i1))) {
                     int testPointId = JsonReader.readValue("value[" + i1 + "].id", azureResponse);
                     testPoints.add(testPointId);

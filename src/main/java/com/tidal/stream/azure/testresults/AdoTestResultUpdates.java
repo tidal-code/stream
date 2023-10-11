@@ -58,6 +58,8 @@ public class AdoTestResultUpdates {
 
         Request.setPayload(updatedPayload);
         Request.send(ReqType.PATCH);
+
+        Request.reset();
     }
 
 }
