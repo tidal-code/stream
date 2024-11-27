@@ -4,6 +4,8 @@ import com.tidal.utils.exceptions.PropertyHandlerException;
 import com.tidal.utils.exceptions.RuntimeTestException;
 import com.tidal.utils.propertieshandler.PropertiesFinder;
 import okhttp3.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -13,6 +15,8 @@ import java.util.function.UnaryOperator;
 
 public class FluentRequest {
 
+    private static final Logger logger = LoggerFactory.getLogger(FluentRequest.class);
+
     private final Function<String, String> timeOut = PropertiesFinder::getProperty;
 
     private final String BASE_URI = "baseURI";
@@ -21,6 +25,8 @@ public class FluentRequest {
     private final String RESPONSE_STRING = "responseString";
     private final String QUERY_PARAM_ONE_KEY = "queryParamOneKey";
     private final String QUERY_PARAM_TWO_KEY = "queryParamTwoKey";
+    private final String QUERY_PARAM_THREE_KEY = "queryParamThreeKey";
+
 
     private OkHttpClient CLIENT;
     private Response RESPONSE;
@@ -32,7 +38,7 @@ public class FluentRequest {
     private final UnaryOperator<String> readTimeOut = s -> {
         try {
             return timeOut.apply(s) == null ? "10" : timeOut.apply(s);
-        } catch (PropertyHandlerException ignored){
+        } catch (PropertyHandlerException ignored) {
             return "10";
         }
     };
@@ -52,6 +58,7 @@ public class FluentRequest {
     public FluentRequest set() {
         CLIENT = getNewOkHttpClient();
         createMap();
+        logger.info("Creating a basic OKHttp client without a url");
         return this;
     }
 
@@ -67,6 +74,7 @@ public class FluentRequest {
         }
         createMap();
         DATA_MAP.put(BASE_URI, baseUri);
+        logger.info("Creating a basic OKHttp client with a url {}", baseUri);
         return this;
     }
 
@@ -81,6 +89,7 @@ public class FluentRequest {
         if (DATA_MAP == null) {
             createMap();
         }
+        logger.info("Resetting the original client with new url {}", baseUri);
         DATA_MAP.put(BASE_URI, baseUri);
         return this;
     }
@@ -92,6 +101,7 @@ public class FluentRequest {
      */
     public FluentRequest setMediaType(String mediaType) {
         DATA_MAP.put(MEDIA_TYPE, mediaType);
+        logger.info("Setting the media type as {}", mediaType);
         return this;
     }
 
@@ -113,6 +123,7 @@ public class FluentRequest {
      */
     public FluentRequest setHeader(String key, Object value) {
         HEADER_MAP.put(key, value);
+        logger.info("Setting the header as {} : {}", key, value);
         return this;
     }
 
@@ -126,15 +137,22 @@ public class FluentRequest {
         if (DATA_MAP.get(QUERY_PARAM_ONE_KEY) == null) {
             DATA_MAP.put(QUERY_PARAM_ONE_KEY, key);
             DATA_MAP.put("queryParamOneValue", value);
+            logger.info("Setting the query param one type as {} : {}", key, value);
         } else if (DATA_MAP.get(QUERY_PARAM_TWO_KEY) == null) {
             DATA_MAP.put(QUERY_PARAM_TWO_KEY, key);
             DATA_MAP.put("queryParamTwoValue", value);
+            logger.info("Setting the query param two type as {} : {}", key, value);
+        } else if (DATA_MAP.get(QUERY_PARAM_THREE_KEY) == null) {
+            DATA_MAP.put(QUERY_PARAM_THREE_KEY, key);
+            DATA_MAP.put("queryParamThreeValue", value);
+            logger.info("Setting the query param three type as {} : {}", key, value);
         }
         return this;
     }
 
     public FluentRequest setPayload(String payload) {
         DATA_MAP.put(PAYLOAD, payload);
+        logger.info("Setting the payload:  {}", payload);
         return this;
     }
 
@@ -147,12 +165,14 @@ public class FluentRequest {
      */
     public <T> FluentRequest setData(String key, T value) {
         DATA_MAP.put(key, value);
+        logger.info("Storing test context data {} : {}", key, value);
         return this;
     }
 
     public <T> FluentRequest setData(DataEnum data, T value) {
         createMap();
         DATA_MAP.put(data.getValue(), value);
+        logger.info("Storing test context data {} : {}", data.getValue(), value);
         return this;
     }
 
@@ -199,8 +219,7 @@ public class FluentRequest {
         applyHeaders();
 
         if (HTTP_REQUEST == null) {
-            okhttp3.Request.Builder requestBuilder = new okhttp3.Request.Builder()
-                    .url(queryBuilder().build());
+            okhttp3.Request.Builder requestBuilder = new okhttp3.Request.Builder().url(queryBuilder().build());
 
             switch (reqType) {
                 case GET:
@@ -227,10 +246,17 @@ public class FluentRequest {
                             .headers(REQUEST_HEADERS)
                             .build();
             }
+            logger.info("Sending the request type as {} to the url {}", reqType, DATA_MAP.get(BASE_URI));
         }
 
         try {
             RESPONSE = CLIENT.newCall(HTTP_REQUEST).execute();
+            //The response has to be stored because the default response.body().string() is auto-closeable
+            if (DATA_MAP.get(RESPONSE_STRING) == null) {
+                DATA_MAP.put(RESPONSE_STRING, RESPONSE.body().string());
+            }
+            RESPONSE.close();
+            logger.info("Received the response: {}" , DATA_MAP.get(RESPONSE_STRING));
         } catch (IOException e) {
             throw new RuntimeTestException("IOException with request" + e.getMessage());
         }
@@ -244,6 +270,9 @@ public class FluentRequest {
         }
         if (DATA_MAP.get(QUERY_PARAM_TWO_KEY) != null) {
             builder.addQueryParameter((String) DATA_MAP.get(QUERY_PARAM_TWO_KEY), (String) DATA_MAP.get("queryParamTwoValue"));
+        }
+        if (DATA_MAP.get(QUERY_PARAM_THREE_KEY) != null) {
+            builder.addQueryParameter((String) DATA_MAP.get(QUERY_PARAM_THREE_KEY), (String) DATA_MAP.get("queryParamThreeValue"));
         }
         return builder;
     }
@@ -275,16 +304,7 @@ public class FluentRequest {
         if (RESPONSE == null) {
             throw new RuntimeTestException("Response string is null : Check if the request is sent");
         }
-
-        try {
-            //The response has to be stored because the default response.body().string() is auto-closeable
-            if (DATA_MAP.get(RESPONSE_STRING) == null) {
-                DATA_MAP.put(RESPONSE_STRING, RESPONSE.body().string());
-            }
-            return (String) DATA_MAP.get(RESPONSE_STRING);
-        } catch (IOException e) {
-            throw new RuntimeTestException("IO Exception with response: " + e.getMessage());
-        }
+        return (String) DATA_MAP.get(RESPONSE_STRING);
     }
 
     private void createMap() {

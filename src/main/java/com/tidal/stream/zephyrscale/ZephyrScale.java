@@ -6,8 +6,13 @@ public class ZephyrScale {
         public ZephyrScaleCukes updateCucumberResults(){
             return new ZephyrScaleCukes();
         }
+
+        public ZephyrScaleTestNG updateTestNGResults(){
+            return new ZephyrScaleTestNG();
+        }
+
+        public ZephyrScaleCSVFeeder updateTestResultsWithCSVFeeder(){
+            return new ZephyrScaleCSVFeeder();
+        }
     }
-
-
-
 }
