@@ -86,7 +86,7 @@ public class AwsDynamoDb {
     @SuppressWarnings("FieldCanBeLocal")
     public static class Finder {
         private static final String PARTITION_KEY_DEFAULT = "businessdomain";
-        private static final String PARTITION_VALUE_DEFAULT = "ION:Default";
+        private static final String PARTITION_VALUE_DEFAULT = "ABC:Default";
         private static final String SORT_KEY_DEFAULT = "id";
         private static final String TABLE_NAME_DEFAULT = "ddb_ErrorAlerts";
 

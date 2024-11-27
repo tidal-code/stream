@@ -11,6 +11,6 @@ public abstract class Authorisation {
         throw new RuntimeTestException("Headers have not been setup");
     }
     public <T> T getParsedUrl(){
-        throw new RuntimeTestException("Url have not been setup");
+        throw new RuntimeTestException("Url has not been setup");
     }
 }
