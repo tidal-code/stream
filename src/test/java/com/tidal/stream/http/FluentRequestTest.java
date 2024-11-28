@@ -1,6 +1,5 @@
 package com.tidal.stream.http;
 
-import com.tidal.flow.assertions.Assert;
 import com.tidal.stream.filehandler.FileReader;
 import com.tidal.stream.httpRequest.FluentRequest;
 import com.tidal.stream.httpRequest.ReqType;
@@ -9,7 +8,7 @@ import com.tidal.stream.json.JsonReader;
 import org.junit.After;
 import org.junit.Test;
 
-import static com.tidal.flow.assertions.Assert.verify;
+import static dev.tidalcode.flow.assertions.Assert.verify;
 
 
 public class FluentRequestTest {

@@ -3,7 +3,6 @@ package com.tidal.stream.azure.screenshots;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.google.common.net.UrlEscapers;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.tidal.stream.httpRequest.ReqType;
 import com.tidal.stream.httpRequest.Request;
@@ -40,7 +39,8 @@ public class AzureScreenshotOperations implements AzureSSOperations {
     public AzureScreenshotOperations(AzurePipelineInfo azurePipelineInfo) {
         buildUri = azurePipelineInfo.getAzureBuildUri();
         authorizationCredential = Credentials.basic("", azurePipelineInfo.getAzureToken());
-        azureUri=String.format(AzureEndPoints.AZURE_BASE_URI,azurePipelineInfo.getAzureDevopsOrgName(), UrlEscapers.urlFragmentEscaper().escape(azurePipelineInfo.getAzureDevopsProjectName()));
+        // todo : google url escapes need to be used : UrlEscapers.urlFragmentEscaper().escape(azurePipelineInfo.getAzureDevopsProjectName()));
+        azureUri=String.format(AzureEndPoints.AZURE_BASE_URI,azurePipelineInfo.getAzureDevopsOrgName(), azurePipelineInfo.getAzureDevopsProjectName());
     }
 
     /**

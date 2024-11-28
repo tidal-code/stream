@@ -4,7 +4,8 @@ import org.jasypt.util.text.AES256TextEncryptor;
 
 import java.util.logging.Logger;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
+import static org.testng.util.Strings.isNullOrEmpty;
+
 
 public class Decryptor {
 

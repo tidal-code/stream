@@ -15,7 +15,7 @@ public enum ReqType {
         this.value = value;
     }
 
-    public String getReqType(){
+    public String getRequestType(){
         return value;
     }
 
