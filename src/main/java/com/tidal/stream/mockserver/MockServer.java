@@ -1,10 +1,9 @@
 package com.tidal.stream.mockserver;
 
 
-import com.github.tomakehurst.wiremock.WireMockServer;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
+/**
+ 
+ Commenting until the Wiremock vulnerability is fixed (Philip Kurian - 28/11/2024)
 
 public class MockServer {
 
@@ -54,3 +53,4 @@ public class MockServer {
         wiremockServer.stop();
     }
 }
+     **/

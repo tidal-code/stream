@@ -5,11 +5,9 @@ import com.tidal.utils.propertieshandler.PropertiesFinder;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.ITestResult;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public abstract class ZephyrScaleTest {
 

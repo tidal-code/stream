@@ -28,12 +28,13 @@ public class FluentRequest {
     private final String QUERY_PARAM_THREE_KEY = "queryParamThreeKey";
 
 
-    private OkHttpClient CLIENT;
-    private Response RESPONSE;
-    private okhttp3.Request HTTP_REQUEST;
-    private HashMap<String, Object> DATA_MAP;
-    private Map<String, Object> HEADER_MAP;
-    private Headers REQUEST_HEADERS;
+    private OkHttpClient client;
+    private Response response;
+    private okhttp3.Request httpRequest;
+    private HashMap<String, Object> dataMap;
+    private Map<String, Object> headerMap;
+    private Map<String, Object> queryParamMap;
+    private Headers requestHeaders;
 
     private final UnaryOperator<String> readTimeOut = s -> {
         try {
@@ -48,7 +49,7 @@ public class FluentRequest {
      * for your request
      */
     public void setHttpRequest(okhttp3.Request builtRequest) {
-        HTTP_REQUEST = builtRequest;
+        httpRequest = builtRequest;
     }
 
     /**
@@ -56,7 +57,7 @@ public class FluentRequest {
      * Base URI can be added later or used with method names.
      */
     public FluentRequest set() {
-        CLIENT = getNewOkHttpClient();
+        client = getNewOkHttpClient();
         createMap();
         logger.info("Creating a basic OKHttp client without a url");
         return this;
@@ -69,11 +70,11 @@ public class FluentRequest {
      * @param baseUri the base uri for the request to be made
      */
     public FluentRequest set(String baseUri) {
-        if (CLIENT == null) {
-            CLIENT = getNewOkHttpClient();
+        if (client == null) {
+            client = getNewOkHttpClient();
         }
         createMap();
-        DATA_MAP.put(BASE_URI, baseUri);
+        dataMap.put(BASE_URI, baseUri);
         logger.info("Creating a basic OKHttp client with a url {}", baseUri);
         return this;
     }
@@ -86,11 +87,11 @@ public class FluentRequest {
      * @param baseUri the base uri or end point
      */
     public FluentRequest setBaseUri(String baseUri) {
-        if (DATA_MAP == null) {
+        if (dataMap == null) {
             createMap();
         }
         logger.info("Resetting the original client with new url {}", baseUri);
-        DATA_MAP.put(BASE_URI, baseUri);
+        dataMap.put(BASE_URI, baseUri);
         return this;
     }
 
@@ -100,7 +101,7 @@ public class FluentRequest {
      * @param mediaType media type
      */
     public FluentRequest setMediaType(String mediaType) {
-        DATA_MAP.put(MEDIA_TYPE, mediaType);
+        dataMap.put(MEDIA_TYPE, mediaType);
         logger.info("Setting the media type as {}", mediaType);
         return this;
     }
@@ -122,7 +123,7 @@ public class FluentRequest {
      * @param value header value
      */
     public FluentRequest setHeader(String key, Object value) {
-        HEADER_MAP.put(key, value);
+        headerMap.put(key, value);
         logger.info("Setting the header as {} : {}", key, value);
         return this;
     }
@@ -134,24 +135,12 @@ public class FluentRequest {
      * @param value query param value
      */
     public FluentRequest setQueryParams(String key, Object value) {
-        if (DATA_MAP.get(QUERY_PARAM_ONE_KEY) == null) {
-            DATA_MAP.put(QUERY_PARAM_ONE_KEY, key);
-            DATA_MAP.put("queryParamOneValue", value);
-            logger.info("Setting the query param one type as {} : {}", key, value);
-        } else if (DATA_MAP.get(QUERY_PARAM_TWO_KEY) == null) {
-            DATA_MAP.put(QUERY_PARAM_TWO_KEY, key);
-            DATA_MAP.put("queryParamTwoValue", value);
-            logger.info("Setting the query param two type as {} : {}", key, value);
-        } else if (DATA_MAP.get(QUERY_PARAM_THREE_KEY) == null) {
-            DATA_MAP.put(QUERY_PARAM_THREE_KEY, key);
-            DATA_MAP.put("queryParamThreeValue", value);
-            logger.info("Setting the query param three type as {} : {}", key, value);
-        }
+        queryParamMap.put(key, value);
         return this;
     }
 
     public FluentRequest setPayload(String payload) {
-        DATA_MAP.put(PAYLOAD, payload);
+        dataMap.put(PAYLOAD, payload);
         logger.info("Setting the payload:  {}", payload);
         return this;
     }
@@ -164,14 +153,14 @@ public class FluentRequest {
      * @param <T>   type of 'value' set
      */
     public <T> FluentRequest setData(String key, T value) {
-        DATA_MAP.put(key, value);
+        dataMap.put(key, value);
         logger.info("Storing test context data {} : {}", key, value);
         return this;
     }
 
     public <T> FluentRequest setData(DataEnum data, T value) {
         createMap();
-        DATA_MAP.put(data.getValue(), value);
+        dataMap.put(data.getValue(), value);
         logger.info("Storing test context data {} : {}", data.getValue(), value);
         return this;
     }
@@ -185,15 +174,15 @@ public class FluentRequest {
      */
     @SuppressWarnings("unchecked")
     public <T> T getData(String key) {
-        return (T) DATA_MAP.get(key);
+        return (T) dataMap.get(key);
     }
 
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getData(DataEnum data) {
-        if (DATA_MAP == null) {
+        if (dataMap == null) {
             this.set();
         }
-        T value = (T) DATA_MAP.get(data.getValue());
+        T value = (T) dataMap.get(data.getValue());
         if (value == null) {
             return Optional.empty();
         }
@@ -209,54 +198,54 @@ public class FluentRequest {
     public FluentRequest send(ReqType reqType) {
 
         MediaType mediaType = MediaType.parse("application/json");
-        if (DATA_MAP.get(MEDIA_TYPE) != null) {
-            mediaType = MediaType.parse((String) DATA_MAP.get(MEDIA_TYPE));
+        if (dataMap.get(MEDIA_TYPE) != null) {
+            mediaType = MediaType.parse((String) dataMap.get(MEDIA_TYPE));
         }
         RequestBody body = RequestBody.create("", mediaType);
-        if (DATA_MAP.get(PAYLOAD) != null) {
-            body = RequestBody.create((String) DATA_MAP.get(PAYLOAD), mediaType);
+        if (dataMap.get(PAYLOAD) != null) {
+            body = RequestBody.create((String) dataMap.get(PAYLOAD), mediaType);
         }
         applyHeaders();
 
-        if (HTTP_REQUEST == null) {
+        if (httpRequest == null) {
             okhttp3.Request.Builder requestBuilder = new okhttp3.Request.Builder().url(queryBuilder().build());
 
             switch (reqType) {
                 case GET:
-                    HTTP_REQUEST = requestBuilder
+                    httpRequest = requestBuilder
                             .get()
-                            .headers(REQUEST_HEADERS)
+                            .headers(requestHeaders)
                             .build();
                     break;
                 case HEAD:
-                    HTTP_REQUEST = requestBuilder
+                    httpRequest = requestBuilder
                             .head()
-                            .headers(REQUEST_HEADERS)
+                            .headers(requestHeaders)
                             .build();
                     break;
                 case DELETE:
-                    HTTP_REQUEST = requestBuilder
+                    httpRequest = requestBuilder
                             .delete()
-                            .headers(REQUEST_HEADERS)
+                            .headers(requestHeaders)
                             .build();
                     break;
                 default:
-                    HTTP_REQUEST = requestBuilder
-                            .method(reqType.getReqType().toUpperCase(Locale.ROOT), body)
-                            .headers(REQUEST_HEADERS)
+                    httpRequest = requestBuilder
+                            .method(reqType.getRequestType().toUpperCase(Locale.ROOT), body)
+                            .headers(requestHeaders)
                             .build();
             }
-            logger.info("Sending the request type as {} to the url {}", reqType, DATA_MAP.get(BASE_URI));
+            logger.info("Sending the request type as {} to the url {}", reqType, dataMap.get(BASE_URI));
         }
 
         try {
-            RESPONSE = CLIENT.newCall(HTTP_REQUEST).execute();
+            response = client.newCall(httpRequest).execute();
             //The response has to be stored because the default response.body().string() is auto-closeable
-            if (DATA_MAP.get(RESPONSE_STRING) == null) {
-                DATA_MAP.put(RESPONSE_STRING, RESPONSE.body().string());
+            if (dataMap.get(RESPONSE_STRING) == null) {
+                dataMap.put(RESPONSE_STRING, response.body().string());
             }
-            RESPONSE.close();
-            logger.info("Received the response: {}" , DATA_MAP.get(RESPONSE_STRING));
+            response.close();
+            logger.info("Received the response: {}" , dataMap.get(RESPONSE_STRING));
         } catch (IOException e) {
             throw new RuntimeTestException("IOException with request" + e.getMessage());
         }
@@ -264,56 +253,56 @@ public class FluentRequest {
     }
 
     private HttpUrl.Builder queryBuilder() {
-        HttpUrl.Builder builder = HttpUrl.get((String) DATA_MAP.get(BASE_URI)).newBuilder();
-        if (DATA_MAP.get(QUERY_PARAM_ONE_KEY) != null) {
-            builder.addQueryParameter((String) DATA_MAP.get(QUERY_PARAM_ONE_KEY), (String) DATA_MAP.get("queryParamOneValue"));
-        }
-        if (DATA_MAP.get(QUERY_PARAM_TWO_KEY) != null) {
-            builder.addQueryParameter((String) DATA_MAP.get(QUERY_PARAM_TWO_KEY), (String) DATA_MAP.get("queryParamTwoValue"));
-        }
-        if (DATA_MAP.get(QUERY_PARAM_THREE_KEY) != null) {
-            builder.addQueryParameter((String) DATA_MAP.get(QUERY_PARAM_THREE_KEY), (String) DATA_MAP.get("queryParamThreeValue"));
-        }
+        HttpUrl.Builder builder = HttpUrl.get((String) dataMap.get(BASE_URI)).newBuilder();
+
+        queryParamMap.forEach((k, v) -> {
+            builder.addQueryParameter(k, String.valueOf(v));
+        });
+
         return builder;
     }
 
     private void applyHeaders() {
         Headers.Builder headerBuilder = new Headers.Builder();
-        for (String key : HEADER_MAP.keySet()) {
-            headerBuilder.add(key, (String) Objects.requireNonNull(HEADER_MAP.get(key)));
+        for (String key : headerMap.keySet()) {
+            headerBuilder.add(key, (String) Objects.requireNonNull(headerMap.get(key)));
         }
 
-        REQUEST_HEADERS = headerBuilder.build();
+        requestHeaders = headerBuilder.build();
     }
 
     public Response response() {
-        if (RESPONSE == null) {
+        if (response == null) {
             throw new RuntimeTestException("Response is null : Check if the request is sent");
         }
-        return RESPONSE;
+        return response;
     }
 
     public int getStatusCode() {
-        if (RESPONSE == null) {
+        if (response == null) {
             throw new RuntimeTestException("Status code is null : Check if the request is sent");
         }
-        return RESPONSE.code();
+        return response.code();
     }
 
     public String getResponseString() {
-        if (RESPONSE == null) {
+        if (response == null) {
             throw new RuntimeTestException("Response string is null : Check if the request is sent");
         }
-        return (String) DATA_MAP.get(RESPONSE_STRING);
+        return (String) dataMap.get(RESPONSE_STRING);
     }
 
     private void createMap() {
-        if (DATA_MAP == null) {
-            DATA_MAP = new HashMap<>();
+        if (dataMap == null) {
+            dataMap = new HashMap<>();
         }
 
-        if (HEADER_MAP == null) {
-            HEADER_MAP = new HashMap<>();
+        if (headerMap == null) {
+            headerMap = new HashMap<>();
+        }
+
+        if(queryParamMap == null){
+            queryParamMap =  new LinkedHashMap<>();
         }
     }
 }

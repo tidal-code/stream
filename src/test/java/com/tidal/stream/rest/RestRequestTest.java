@@ -2,11 +2,11 @@ package com.tidal.stream.rest;
 
 import com.tidal.stream.filehandler.FileReader;
 import com.tidal.stream.json.JsonReader;
-import com.tidal.flow.assertions.Assert;
+import dev.tidalcode.flow.assertions.Assert;
 import org.junit.After;
 import org.junit.Test;
 
-import static com.tidal.flow.assertions.Assert.verify;
+import static dev.tidalcode.flow.assertions.Assert.verify;
 
 
 public class RestRequestTest {
