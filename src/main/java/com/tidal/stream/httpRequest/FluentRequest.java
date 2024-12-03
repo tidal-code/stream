@@ -23,9 +23,6 @@ public class FluentRequest {
     private final String MEDIA_TYPE = "mediaType";
     private final String PAYLOAD = "payload";
     private final String RESPONSE_STRING = "responseString";
-    private final String QUERY_PARAM_ONE_KEY = "queryParamOneKey";
-    private final String QUERY_PARAM_TWO_KEY = "queryParamTwoKey";
-    private final String QUERY_PARAM_THREE_KEY = "queryParamThreeKey";
 
 
     private OkHttpClient client;
@@ -35,6 +32,7 @@ public class FluentRequest {
     private Map<String, Object> headerMap;
     private Map<String, Object> queryParamMap;
     private Headers requestHeaders;
+    private FormBody.Builder formBodyBuilder;
 
     private final UnaryOperator<String> readTimeOut = s -> {
         try {
@@ -139,6 +137,23 @@ public class FluentRequest {
         return this;
     }
 
+    /**
+     * Sets the form param elements for authorization building
+     * @param key form param key
+     * @param value form param value
+     */
+    public FluentRequest setFormParam(String key, String value){
+        if(null == formBodyBuilder) {
+            formBodyBuilder = new FormBody.Builder();
+        }
+        formBodyBuilder.add(key, value);
+        return this;
+    }
+
+    /**
+     * Sets request payload
+     * @param payload request payload
+     */
     public FluentRequest setPayload(String payload) {
         dataMap.put(PAYLOAD, payload);
         logger.info("Setting the payload:  {}", payload);
@@ -161,7 +176,7 @@ public class FluentRequest {
     public <T> FluentRequest setData(DataEnum data, T value) {
         createMap();
         dataMap.put(data.getValue(), value);
-        logger.info("Storing test context data {} : {}", data.getValue(), value);
+        logger.info("Storing test context data  with DataEnum contact{} : {}", data.getValue(), value);
         return this;
     }
 
@@ -202,9 +217,12 @@ public class FluentRequest {
             mediaType = MediaType.parse((String) dataMap.get(MEDIA_TYPE));
         }
         RequestBody body = RequestBody.create("", mediaType);
-        if (dataMap.get(PAYLOAD) != null) {
+        if (formBodyBuilder == null && dataMap.get(PAYLOAD) != null) {
             body = RequestBody.create((String) dataMap.get(PAYLOAD), mediaType);
+        } else {
+            body = formBodyBuilder.build();
         }
+
         applyHeaders();
 
         if (httpRequest == null) {

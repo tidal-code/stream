@@ -7,7 +7,10 @@ public enum ReqType {
     PATCH("patch"),
     HEAD("head"),
     OPTIONS("options"),
-    DELETE("delete");
+    DELETE("delete"),
+    CONNECT("connect"),
+    TRACE("trace");
+
 
     private final String value;
 
