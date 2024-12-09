@@ -13,60 +13,67 @@ import static dev.tidalcode.flow.assertions.Assert.verify;
 
 public class FluentRequestTest {
 
-    @After
-    public void afterTest(){
-        Request.reset();
-    }
-
     @Test
-    public void queryParamTest(){
+    public void queryParamTest() {
         FluentRequest fluentRequest = new FluentRequest();
         fluentRequest
                 .set("https://reqres.in/api/users")
+                .setMediaType("application/json")
                 .setQueryParams("page", "2")
                 .send(ReqType.GET);
 
+        System.out.println("Response Code: " + fluentRequest.getStatusCode());
         verify("", JsonReader.readValue("page", fluentRequest.getResponseString()).toString()).isEqualTo("2");
     }
 
     @Test
-    public void getTest(){
-        Request.set("https://reqres.in/api/users/2");
-        Request.send(ReqType.GET);
-        verify("", JsonReader.readValue("data.id", Request.getResponseString()).toString()).isEqualTo("2");
+    public void getTest() {
+        FluentRequest fluentRequest = new FluentRequest();
+        fluentRequest.set("https://reqres.in/api/users/2");
+        fluentRequest.setMediaType("application/json");
+        fluentRequest.send(ReqType.GET);
+        verify("", JsonReader.readValue("data.id", fluentRequest.getResponseString()).toString()).isEqualTo("2");
     }
 
     @Test
-    public void postTest(){
-        Request.set("https://reqres.in/api/users");
-        Request.setPayload(FileReader.readFileToString("reqrespost.json"));
-        Request.send(ReqType.POST);
-        verify("", JsonReader.readValue("name", Request.getResponseString()).toString()).isEqualTo("morpheus");
+    public void postTest() {
+        FluentRequest fluentRequest = new FluentRequest();
+        fluentRequest.set("https://reqres.in/api/users");
+        fluentRequest.setMediaType("application/json");
+        fluentRequest.setPayload(FileReader.readFileToString("reqrespost.json"));
+        fluentRequest.send(ReqType.POST);
+        verify("", JsonReader.readValue("name", fluentRequest.getResponseString()).toString()).isEqualTo("morpheus");
     }
 
     @Test
-    public void putTest(){
-        Request.set("https://reqres.in/api/users/2");
-        Request.setPayload(FileReader.readFileToString("reqresput.json"));
-        Request.send(ReqType.PUT);
-        verify("", JsonReader.readValue("name", Request.getResponseString()).toString()).isEqualTo("morpheus");
+    public void putTest() {
+        FluentRequest fluentRequest = new FluentRequest();
+        fluentRequest.set("https://reqres.in/api/users/2");
+        fluentRequest.setMediaType("application/json");
+        fluentRequest.setPayload(FileReader.readFileToString("reqresput.json"));
+        fluentRequest.send(ReqType.PUT);
+        verify("", JsonReader.readValue("name", fluentRequest.getResponseString()).toString()).isEqualTo("morpheus");
     }
 
     @Test
-    public void patchTest(){
-        Request.set("https://reqres.in/api/users");
-        Request.setPayload(FileReader.readFileToString("reqrespost.json"));
-        Request.send(ReqType.PATCH);
-//        Request.logResponse();
-        verify("", JsonReader.readValue("name", Request.getResponseString()).toString()).isEqualTo("morpheus");
+    public void patchTest() {
+        FluentRequest fluentRequest = new FluentRequest();
+        fluentRequest.set("https://reqres.in/api/users");
+        fluentRequest.setMediaType("application/json");
+        fluentRequest.setPayload(FileReader.readFileToString("reqrespost.json"));
+        fluentRequest.send(ReqType.PATCH);
+//        fluentRequest.logResponse();
+        verify("", JsonReader.readValue("name", fluentRequest.getResponseString()).toString()).isEqualTo("morpheus");
     }
 
     @Test
-    public void deleteTest(){
-        Request.set("https://reqres.in/api/users/2");
-        Request.setPayload(FileReader.readFileToString("reqrespost.json"));
-        Request.send(ReqType.DELETE);
-        verify("", Request.getResponseString()).isEqualTo("");
-//        verify("", Request.getStatusCode()).isEqualTo(204);
+    public void deleteTest() {
+        FluentRequest fluentRequest = new FluentRequest();
+        fluentRequest.set("https://reqres.in/api/users/2");
+        fluentRequest.setMediaType("application/json");
+        fluentRequest.setPayload(FileReader.readFileToString("reqrespost.json"));
+        fluentRequest.send(ReqType.DELETE);
+        verify("", fluentRequest.getResponseString()).isEqualTo("");
+//        verify("", fluentRequest.getStatusCode()).isEqualTo(204);
     }
 }

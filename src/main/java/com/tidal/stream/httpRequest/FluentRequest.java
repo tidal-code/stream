@@ -16,17 +16,14 @@ import java.util.function.UnaryOperator;
 public class FluentRequest {
 
     private static final Logger logger = LoggerFactory.getLogger(FluentRequest.class);
-
     private final Function<String, String> timeOut = PropertiesFinder::getProperty;
 
-    private final String BASE_URI = "baseURI";
-    private final String MEDIA_TYPE = "mediaType";
-    private final String PAYLOAD = "payload";
-    private final String RESPONSE_STRING = "responseString";
-
-
     private OkHttpClient client;
+    private String baseURI;
+    private String mediaType;
+    private String responseBody;
     private Response response;
+    private String payload;
     private okhttp3.Request httpRequest;
     private HashMap<String, Object> dataMap;
     private Map<String, Object> headerMap;
@@ -50,46 +47,20 @@ public class FluentRequest {
         httpRequest = builtRequest;
     }
 
-    /**
-     * Initiate the RequestSpecification for the Http Request  without a base URI.
-     * Base URI can be added later or used with method names.
-     */
-    public FluentRequest set() {
-        client = getNewOkHttpClient();
-        createMap();
-        logger.info("Creating a basic OKHttp client without a url");
-        return this;
-    }
 
     /**
      * This method sets the Base URI with the RequestSpecification and in turn overrides
      * the Base URI value if it is already present
      *
-     * @param baseUri the base uri for the request to be made
+     * @param baseURI the base uri for the request to be made
      */
-    public FluentRequest set(String baseUri) {
+    public FluentRequest set(String baseURI) {
         if (client == null) {
             client = getNewOkHttpClient();
         }
+        this.baseURI = baseURI;
         createMap();
-        dataMap.put(BASE_URI, baseUri);
-        logger.info("Creating a basic OKHttp client with a url {}", baseUri);
-        return this;
-    }
-
-    /**
-     * Sets the base Uri as a rest assured property instead of a request specification instance.
-     * This would enable the creation of a new instance of request specification without deleting
-     * the base Uri
-     *
-     * @param baseUri the base uri or end point
-     */
-    public FluentRequest setBaseUri(String baseUri) {
-        if (dataMap == null) {
-            createMap();
-        }
-        logger.info("Resetting the original client with new url {}", baseUri);
-        dataMap.put(BASE_URI, baseUri);
+        logger.info("Creating a basic OKHttp client with a url {}", baseURI);
         return this;
     }
 
@@ -99,7 +70,7 @@ public class FluentRequest {
      * @param mediaType media type
      */
     public FluentRequest setMediaType(String mediaType) {
-        dataMap.put(MEDIA_TYPE, mediaType);
+        this.mediaType = mediaType;
         logger.info("Setting the media type as {}", mediaType);
         return this;
     }
@@ -123,6 +94,11 @@ public class FluentRequest {
     public FluentRequest setHeader(String key, Object value) {
         headerMap.put(key, value);
         logger.info("Setting the header as {} : {}", key, value);
+        return this;
+    }
+
+    public FluentRequest setBearerToken(String token){
+        headerMap.put("Authorization", "Bearer " + token);
         return this;
     }
 
@@ -155,55 +131,10 @@ public class FluentRequest {
      * @param payload request payload
      */
     public FluentRequest setPayload(String payload) {
-        dataMap.put(PAYLOAD, payload);
+        this.payload = payload;
         logger.info("Setting the payload:  {}", payload);
         return this;
     }
-
-    /**
-     * A data context map set up to carry data across steps
-     *
-     * @param key   key for assigning value
-     * @param value assigned value
-     * @param <T>   type of 'value' set
-     */
-    public <T> FluentRequest setData(String key, T value) {
-        dataMap.put(key, value);
-        logger.info("Storing test context data {} : {}", key, value);
-        return this;
-    }
-
-    public <T> FluentRequest setData(DataEnum data, T value) {
-        createMap();
-        dataMap.put(data.getValue(), value);
-        logger.info("Storing test context data  with DataEnum contact{} : {}", data.getValue(), value);
-        return this;
-    }
-
-    /**
-     * Retrieves the data from a static context map and at the same time ensured thread safety
-     *
-     * @param key key to assign the value
-     * @param <T> object type
-     * @return a static map in context of the current thread
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T getData(String key) {
-        return (T) dataMap.get(key);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> getData(DataEnum data) {
-        if (dataMap == null) {
-            this.set();
-        }
-        T value = (T) dataMap.get(data.getValue());
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(value);
-    }
-
 
     /**
      * Sends the request to the end point with a Uri path
@@ -212,13 +143,16 @@ public class FluentRequest {
      */
     public FluentRequest send(ReqType reqType) {
 
-        MediaType mediaType = MediaType.parse("application/json");
-        if (dataMap.get(MEDIA_TYPE) != null) {
-            mediaType = MediaType.parse((String) dataMap.get(MEDIA_TYPE));
+        MediaType parsedMediatype = null;
+
+        if (mediaType != null) {
+            parsedMediatype = MediaType.parse( mediaType);
         }
-        RequestBody body = RequestBody.create("", mediaType);
-        if (formBodyBuilder == null && dataMap.get(PAYLOAD) != null) {
-            body = RequestBody.create((String) dataMap.get(PAYLOAD), mediaType);
+
+        RequestBody body = null;
+
+        if (formBodyBuilder == null && payload != null) {
+            body = RequestBody.create(payload, parsedMediatype);
         } else if(formBodyBuilder != null){
             body = formBodyBuilder.build();
         }
@@ -253,17 +187,15 @@ public class FluentRequest {
                             .headers(requestHeaders)
                             .build();
             }
-            logger.info("Sending the request type as {} to the url {}", reqType, dataMap.get(BASE_URI));
+            logger.info("Sending the request type as {} to the url {}", reqType, httpRequest.url());
         }
 
         try {
             response = client.newCall(httpRequest).execute();
-            //The response has to be stored because the default response.body().string() is auto-closeable
-            if (dataMap.get(RESPONSE_STRING) == null) {
-                dataMap.put(RESPONSE_STRING, response.body().string());
-            }
+            responseBody = response.body().string();
             response.close();
-            logger.info("Received the response: {}" , dataMap.get(RESPONSE_STRING));
+            logger.info("Response status: {} {}", response.code(), response.message());
+            logger.info("Response Message: {}" , responseBody);
         } catch (IOException e) {
             throw new RuntimeTestException("IOException with request" + e.getMessage());
         }
@@ -271,7 +203,7 @@ public class FluentRequest {
     }
 
     private HttpUrl.Builder queryBuilder() {
-        HttpUrl.Builder builder = HttpUrl.get((String) dataMap.get(BASE_URI)).newBuilder();
+        HttpUrl.Builder builder = HttpUrl.get(baseURI).newBuilder();
 
         queryParamMap.forEach((k, v) -> {
             builder.addQueryParameter(k, String.valueOf(v));
@@ -307,7 +239,7 @@ public class FluentRequest {
         if (response == null) {
             throw new RuntimeTestException("Response string is null : Check if the request is sent");
         }
-        return (String) dataMap.get(RESPONSE_STRING);
+        return responseBody;
     }
 
     private void createMap() {
