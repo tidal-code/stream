@@ -1,5 +1,6 @@
 package com.tidal.stream.rest;
 
+@Deprecated
 public enum ReqType {
     GET("get"), POST("post"), PUT("put"), PATCH("patch"), DELETE("delete");
 

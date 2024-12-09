@@ -219,7 +219,7 @@ public class FluentRequest {
         RequestBody body = RequestBody.create("", mediaType);
         if (formBodyBuilder == null && dataMap.get(PAYLOAD) != null) {
             body = RequestBody.create((String) dataMap.get(PAYLOAD), mediaType);
-        } else {
+        } else if(formBodyBuilder != null){
             body = formBodyBuilder.build();
         }
 

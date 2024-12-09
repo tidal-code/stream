@@ -15,7 +15,7 @@ import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 
-
+@Deprecated
 public class Request {
 
 //    private static final Log log = Log.getLogger(Request.class);

@@ -87,6 +87,10 @@ public class Request {
         FLUENT_REQUEST.get().setQueryParams(key, value);
     }
 
+    public static void setFormParam(String key, String value) {
+        FLUENT_REQUEST.get().setFormParam(key, value);
+    }
+
     public static void setPayload(String payload) {
         FLUENT_REQUEST.get().setPayload(payload);
     }
